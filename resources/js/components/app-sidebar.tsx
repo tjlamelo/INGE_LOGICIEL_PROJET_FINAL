@@ -15,11 +15,29 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
-
+import { index } from '@/routes/user/import'
+import { dashboard as adminDashboard } from '@/routes/admin/index'  ;
+import { index as adminPermissions } from '@/routes/admin/permissions'; 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Admin Dashboard',
+        href: adminDashboard(),
+        icon: LayoutGrid,
+    },
+    
+    {
+        title: 'Admin Permissions',
+        href: adminPermissions(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Import',
+        href: index(),
         icon: LayoutGrid,
     },
 ];
