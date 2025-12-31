@@ -18,6 +18,9 @@ import AppLogo from './app-logo';
 import { index } from '@/routes/user/import'
 import { dashboard as adminDashboard } from '@/routes/admin/index'  ;
 import { index as adminPermissions } from '@/routes/admin/permissions'; 
+import { index as matiereIndex } from '@/routes/matieres';
+import {index as classeIndex } from '@/routes/classes';
+import {index as eleveIndex } from '@/routes/eleves';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -38,6 +41,22 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Import',
         href: index(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Matiere',
+        href: matiereIndex(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Classe',
+        href: classeIndex(),
+        icon: LayoutGrid,
+    },
+    
+    {
+        title: 'Eleve',
+        href: eleveIndex(),
         icon: LayoutGrid,
     },
 ];

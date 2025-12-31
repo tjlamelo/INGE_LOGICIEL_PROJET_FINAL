@@ -1,6 +1,7 @@
 import React from "react";
 import AppLayout from "@/layouts/app-layout";
 import TableUser from "./user/tableUser";
+import { Head } from "@inertiajs/react";
 
 type User = {
     id: number;
@@ -26,6 +27,8 @@ export default function AdminDashboard({ users }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+               <Head title="Dashboard" />
+           
             <div className="p-6">
                 {/* <TableUser users={users} roles={[]} /> */}
             </div>

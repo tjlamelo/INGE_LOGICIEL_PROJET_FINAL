@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Academique\ClasseController;
+use App\Http\Controllers\Academique\MatiereController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPermissionController;
+use App\Http\Controllers\User\EleveController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -35,3 +38,12 @@ Route::get('/admin/permissions', [AdminPermissionController::class, 'index'])
  
 Route::put('/admin/users/{user}/role', [AdminPermissionController::class, 'updateRole'])
     ->name('admin.permissions.updateRole');
+    
+Route::middleware(['auth'])->group(function () {
+    Route::resource('matieres', MatiereController::class);
+    Route::resource('classes', ClasseController::class);
+Route::resource('eleves', EleveController::class)->parameters([
+    'eleves' => 'eleve', // ici on s'assure que le paramètre s'appelle 'eleve'
+]);
+
+});
