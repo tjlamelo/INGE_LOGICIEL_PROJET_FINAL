@@ -20,6 +20,7 @@ return new class extends Migration {
 
             // Un enseignant n'enseigne qu'une seule matière dans une classe donnée
             $table->unique(['enseignant_id', 'classe_id', 'matiere_id']);
+            
             $table->timestamps();
         });
     }

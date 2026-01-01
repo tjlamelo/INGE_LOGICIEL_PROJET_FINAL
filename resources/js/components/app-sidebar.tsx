@@ -21,6 +21,10 @@ import { index as adminPermissions } from '@/routes/admin/permissions';
 import { index as matiereIndex } from '@/routes/matieres';
 import {index as classeIndex } from '@/routes/classes';
 import {index as eleveIndex } from '@/routes/eleves';
+import {index as enseignantIndex } from '@/routes/enseignants';
+import {index as trimestreIndex}   from '@/routes/trimestres';
+import {index as enseignementIndex}   from '@/routes/enseignements';
+import {index as noteIndex}   from '@/routes/notes';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -57,6 +61,26 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Eleve',
         href: eleveIndex(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Enseignant',
+        href: enseignantIndex(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Trimestre',
+        href: trimestreIndex(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Enseignement',
+        href: enseignementIndex(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Note',
+        href: noteIndex(),
         icon: LayoutGrid,
     },
 ];
