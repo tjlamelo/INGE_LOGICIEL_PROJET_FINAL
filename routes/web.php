@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\User\Import\ImportController;
+use App\Http\Controllers\Admin\MatiereController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -17,6 +18,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/matieres', [MatiereController::class, 'index'])->name('matieres.index');
+    Route::get('/matieres/create', [MatiereController::class, 'create'])->name('matieres.create');
+    Route::post('/matieres', [MatiereController::class, 'store'])->name('matieres.store');
+    Route::delete('/matieres/{matiere}', [MatiereController::class, 'destroy'])->name('matieres.destroy');
+    Route::resource('matieres', MatiereController::class);
 });
 
 

@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('matieres', function (Blueprint $table) {
+        Schema::create('creneau_horaires', function (Blueprint $table) {
             $table->id();
-            $table->string('nom'); // ex: Mathématiques
-            $table->string('code', 10)->unique(); // ex: MATH
-            $table->integer('coefficient');
             $table->timestamps();
         });
     }
@@ -25,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('matieres');
+        Schema::dropIfExists('creneau_horaires');
     }
 };

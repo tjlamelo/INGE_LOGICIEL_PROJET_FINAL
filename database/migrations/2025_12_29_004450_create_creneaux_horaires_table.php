@@ -12,6 +12,8 @@ return new class extends Migration {
     {
         Schema::create('creneaux_horaires', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('matiere_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
             // Heure de début et de fin du créneau
             $table->time('heure_debut');
             $table->time('heure_fin');
