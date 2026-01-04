@@ -11,77 +11,114 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
-import AppLogo from './app-logo';
-import { index } from '@/routes/user/import'
-import { dashboard as adminDashboard } from '@/routes/admin/index'  ;
-import { index as adminPermissions } from '@/routes/admin/permissions'; 
+import { dashboard as adminDashboard } from '@/routes/admin/index';
+import { index as adminPermissions } from '@/routes/admin/permissions';
+import { index as classeIndex } from '@/routes/classes';
+import { index as eleveIndex } from '@/routes/eleves';
+import { index as enseignantIndex } from '@/routes/enseignants';
+import { index as enseignementIndex } from '@/routes/enseignements';
 import { index as matiereIndex } from '@/routes/matieres';
-import {index as classeIndex } from '@/routes/classes';
-import {index as eleveIndex } from '@/routes/eleves';
-import {index as enseignantIndex } from '@/routes/enseignants';
-import {index as trimestreIndex}   from '@/routes/trimestres';
-import {index as enseignementIndex}   from '@/routes/enseignements';
-import {index as noteIndex}   from '@/routes/notes';
+import { index as noteIndex } from '@/routes/notes';
+import { index as trimestreIndex } from '@/routes/trimestres';
+import { index as userImportIndex } from '@/routes/user/import';
+import { type NavItem } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+// Importation des icônes corrigée
+import { 
+    BookOpen, 
+    Folder, 
+    LayoutDashboard, 
+    ShieldCheck,     
+    Upload,          
+    Users,           
+    GraduationCap,   
+    Calendar,        
+    Presentation,    // ✅ Icône de remplacement pour Chalkboard
+    FileText,        
+    FileBarChart     
+} from 'lucide-react';
+import AppLogo from './app-logo';
+ 
+// ✅ Définir le type NavItem avec roles
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+    { 
+        title: 'Dashboard', 
+        href: dashboard(), 
+        icon: LayoutDashboard,   
+        roles: [    
+            'student',
+            'teacher',
+            'general_supervisor',
+            'censor',
+            'principal',
+            'guest'
+        ], 
     },
     {
-        title: 'Admin Dashboard',
+        title: 'Dashboard Admin',
         href: adminDashboard(),
-        icon: LayoutGrid,
+        icon: LayoutDashboard,   
+        roles: ['admin'],
     },
-    
     {
-        title: 'Admin Permissions',
+        title: 'Permissions',
         href: adminPermissions(),
-        icon: LayoutGrid,
+        icon: ShieldCheck,       
+        // roles: ['admin'],
     },
     {
         title: 'Import',
-        href: index(),
-        icon: LayoutGrid,
+        href: userImportIndex(),
+        icon: Upload,            
+        roles: ['admin', 'teacher'],
     },
     {
-        title: 'Matiere',
+        title: 'Matières',
         href: matiereIndex(),
-        icon: LayoutGrid,
+        icon: BookOpen,          
+        roles: ['admin', 'enseignant'],
     },
     {
-        title: 'Classe',
+        title: 'Classes',
         href: classeIndex(),
-        icon: LayoutGrid,
+        icon: Users,             
+        roles: ['admin', 'teacher'],
     },
-    
     {
-        title: 'Eleve',
+        title: 'Élèves',
         href: eleveIndex(),
-        icon: LayoutGrid,
+        icon: GraduationCap,     
+        roles: ['admin', 'enseignant'],
     },
     {
-        title: 'Enseignant',
+        title: 'Enseignants',
         href: enseignantIndex(),
-        icon: LayoutGrid,
+        icon: Users,             
+        roles: ['admin'],
     },
     {
-        title: 'Trimestre',
+        title: 'Trimestres',
         href: trimestreIndex(),
-        icon: LayoutGrid,
+        icon: Calendar,          
+        roles: ['admin', 'enseignant'],
     },
     {
-        title: 'Enseignement',
+        title: 'Enseignements',
         href: enseignementIndex(),
-        icon: LayoutGrid,
+        icon: Presentation,      // ✅ Icône corrigée ici
+        roles: ['admin', 'teacher'],
     },
     {
-        title: 'Note',
+        title: 'Notes',
         href: noteIndex(),
-        icon: LayoutGrid,
+        icon: FileText,          
+        roles: ['admin', 'teacher'],
+    },
+    {
+        title: 'Bulletins',
+        href:  '/bulletins',
+        icon: FileBarChart,      
+        roles: ['admin', 'teacher'],
     },
 ];
 
@@ -98,7 +135,30 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
+// ✅ Définir ton type pour props côté client
+interface MyProps {
+    auth: {
+        user: {
+            id: number;
+            name: string;
+            email: string;
+            roles: string[]; // ou string si tu utilises Spatie
+        } | null;
+    };
+    [key: string]: any; // pour toutes les autres props Inertia
+}
+
 export function AppSidebar() {
+    const { auth } = usePage<MyProps>().props;
+
+    const roles: string[] = auth.user?.roles || [];
+
+    // ✅ Filtrer les menus selon les rôles
+    const filteredNavItems = mainNavItems.filter((item) => {
+        if (!item.roles) return true; // pas de restriction, visible pour tous
+        return item.roles.some((role) => roles.includes(role));
+    });
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -114,7 +174,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={filteredNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

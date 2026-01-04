@@ -14,6 +14,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { Users, BookOpen, GraduationCap, TrendingUp, Plus } from "lucide-react";
 
 // --- Types ---
 type Classe = {
@@ -21,16 +22,31 @@ type Classe = {
     nom: string;
     niveau: string;
     filiere: string | null;
+    eleves_count?: number;
     created_at: string;
     updated_at: string;
 };
 
 type PaginationLinks = { url: string | null; label: string; active: boolean; };
 type PaginatedClasses = { data: Classe[]; links: PaginationLinks[]; from: number | null; to: number | null; total: number; };
-type PageProps = { classes: PaginatedClasses; flash: { success?: string; error?: string; }; };
+type ClasseStats = {
+    total_classes: number;
+    total_students: number;
+    average_students_per_class: number;
+    classes_by_level: Array<{ niveau: string; count: number; students_count: number }>;
+    classes_by_filiere: Array<{ filiere: string; count: number; students_count: number }>;
+    most_populated_class: Classe | null;
+    least_populated_class: Classe | null;
+};
+
+type PageProps = { 
+    classes: PaginatedClasses; 
+    stats: ClasseStats;
+    flash: { success?: string; error?: string; }; 
+};
 
 export default function ClasseIndex() {
-    const { classes, flash } = usePage<PageProps>().props;
+    const { classes, stats, flash } = usePage<PageProps>().props;
     const [showSuccessAlert, setShowSuccessAlert] = React.useState<boolean>(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState<boolean>(false);
     const [classeToDelete, setClasseToDelete] = React.useState<Classe | null>(null);
@@ -61,12 +77,117 @@ export default function ClasseIndex() {
         <AppLayout breadcrumbs={[{ title: "Académique", href: "#" }, { title: "Classes", href: "/classes" }]}>
             <Head title="Liste des Classes" />
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-6">
                 {showSuccessAlert && <Alert><AlertDescription>{flash.success}</AlertDescription></Alert>}
 
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-semibold">Liste des Classes</h1>
-                    <Link href="/classes/create"><Button>Créer une Classe</Button></Link>
+                    <Link href="/classes/create">
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Créer une Classe
+                        </Button>
+                    </Link>
+                </div>
+
+                {/* Statistics Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
+                            <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats.total_classes}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Élèves</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats.total_students}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Moyenne/Classe</CardTitle>
+                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{stats.average_students_per_class.toFixed(1)}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Classe la + remplie</CardTitle>
+                            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-lg font-bold">
+                                {stats.most_populated_class ? 
+                                    `${stats.most_populated_class.nom} (${stats.most_populated_class.eleves_count})` : 
+                                    'N/A'
+                                }
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Classes by Level */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Classes par Niveau</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {stats.classes_by_level.map((level) => (
+                                    <div key={level.niveau} className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <Badge variant="outline">{level.niveau}</Badge>
+                                            <span className="text-sm text-muted-foreground">
+                                                {level.count} classe{level.count > 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-sm font-medium">{level.students_count}</span>
+                                            <span className="text-sm text-muted-foreground">élèves</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Classes by Filiere */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Classes par Filière</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {stats.classes_by_filiere.map((filiere) => (
+                                    <div key={filiere.filiere} className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <Badge variant="outline">{filiere.filiere}</Badge>
+                                            <span className="text-sm text-muted-foreground">
+                                                {filiere.count} classe{filiere.count > 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-sm font-medium">{filiere.students_count}</span>
+                                            <span className="text-sm text-muted-foreground">élèves</span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {stats.classes_by_filiere.length === 0 && (
+                                    <p className="text-sm text-muted-foreground">Aucune filière spécifiée</p>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <Card>
@@ -75,7 +196,13 @@ export default function ClasseIndex() {
                         <div className="relative overflow-x-auto">
                             <table className="w-full text-sm text-left text-gray-500">
                                 <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                                    <tr><th scope="col" className="px-6 py-3">Nom</th><th scope="col" className="px-6 py-3">Niveau</th><th scope="col" className="px-6 py-3">Filière</th><th scope="col" className="px-6 py-3 text-right">Actions</th></tr>
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3">Nom</th>
+                                        <th scope="col" className="px-6 py-3">Niveau</th>
+                                        <th scope="col" className="px-6 py-3">Filière</th>
+                                        <th scope="col" className="px-6 py-3">Élèves</th>
+                                        <th scope="col" className="px-6 py-3 text-right">Actions</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                     {classes.data.map((classe: Classe) => (
@@ -83,9 +210,18 @@ export default function ClasseIndex() {
                                             <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{classe.nom}</td>
                                             <td className="px-6 py-4">{classe.niveau}</td>
                                             <td className="px-6 py-4">{classe.filiere || <span className="text-gray-400">Non spécifiée</span>}</td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant={classe.eleves_count && classe.eleves_count > 30 ? "destructive" : "secondary"}>
+                                                    {classe.eleves_count || 0} élève{classe.eleves_count && classe.eleves_count > 1 ? 's' : ''}
+                                                </Badge>
+                                            </td>
                                             <td className="px-6 py-4 text-right space-x-2">
-                                                <Link href={`/classes/${classe.id}`}><Button variant="outline" size="sm">Voir</Button></Link>
-                                                <Link href={`/classes/${classe.id}/edit`}><Button variant="outline" size="sm">Modifier</Button></Link>
+                                                <Link href={`/classes/${classe.id}`}>
+                                                    <Button variant="outline" size="sm">Voir</Button>
+                                                </Link>
+                                                <Link href={`/classes/${classe.id}/edit`}>
+                                                    <Button variant="outline" size="sm">Modifier</Button>
+                                                </Link>
                                                 <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                                                     <DialogTrigger asChild>
                                                         <Button variant="destructive" size="sm" onClick={() => openDeleteDialog(classe)}>Supprimer</Button>

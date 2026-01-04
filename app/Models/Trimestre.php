@@ -17,6 +17,7 @@ class Trimestre extends Model
     protected $fillable = [
         'nom',
         'annee_scolaire',
+        'est_actif',
     ];
 
     /**

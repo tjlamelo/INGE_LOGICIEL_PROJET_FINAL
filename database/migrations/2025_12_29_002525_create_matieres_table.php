@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
                    $table->string('nom'); // ex: Mathématiques
             $table->string('code', 10)->unique(); // ex: MATH
+            $table->integer('groupe');
             $table->timestamps();
         });
     }

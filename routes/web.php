@@ -6,7 +6,9 @@ use App\Http\Controllers\Academique\MatiereController;
 use App\Http\Controllers\Academique\TrimestreController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPermissionController;
+use App\Http\Controllers\Evaluation\BulletinController;
 use App\Http\Controllers\Evaluation\NoteController;
+use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\EleveController;
 use App\Http\Controllers\User\EnseignantController;
 use Illuminate\Support\Facades\Route;
@@ -21,9 +23,11 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    // Route::get('dashboard', function () {
+    //     return Inertia::render('dashboard');
+    // })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 });
 
 
@@ -44,6 +48,8 @@ Route::put('/admin/users/{user}/role', [AdminPermissionController::class, 'updat
     ->name('admin.permissions.updateRole');
 
 Route::middleware(['auth'])->group(function () {
+        Route::resource('notes', NoteController::class);
+
     Route::resource('matieres', MatiereController::class);
     Route::resource('classes', ClasseController::class);
     Route::resource('eleves', EleveController::class)->parameters([
@@ -54,5 +60,20 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('trimestres', TrimestreController::class);
     Route::resource('enseignements', EnseignementController::class);
-    Route::resource('notes', NoteController::class);
+
+ 
+
+// Routes pour les bulletins - Pattern RESTful
+Route::resource('bulletins', BulletinController::class);
+
+// Routes supplémentaires avec le pattern exact comme dans votre exemple
+Route::get('/bulletins/{eleve}/{trimestre}', [BulletinController::class, 'show'])->name('bulletins.show');
+Route::get('/bulletins/{eleve}/{trimestre}/pdf', [BulletinController::class, 'downloadPdf'])->name('bulletins.pdf');
+Route::get('/bulletins/bulk-print/{classe}/{trimestre}', [BulletinController::class, 'bulkPrint'])->name('bulletins.bulk-print');
 });
+
+ 
+ 
+Route::get('/bulletins/bulk-download/{classe}/{trimestre}', [BulletinController::class, 'bulkDownload'])
+    ->name('bulletins.bulk.download')
+    ->middleware(['auth', 'verified']); // Assurez-vous que la protection est adéquate

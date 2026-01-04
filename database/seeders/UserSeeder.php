@@ -28,30 +28,6 @@ class UserSeeder extends Seeder
         );
         $admin->assignRole('admin');
 
-        // Crée un teacher
-        $teacher = User::firstOrCreate(
-            ['email' => 'teacher@example.com'],
-            [
-                'name' => 'Teacher User',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
-        $teacher->assignRole('teacher');
-
-        // Crée des élèves (plus nombreux)
-        for ($i = 1; $i <= 15; $i++) {
-            $student = User::firstOrCreate(
-                ['email' => "student{$i}@example.com"],
-                [
-                    'name' => "Student {$i}",
-                    'password' => Hash::make('password'),
-                    'email_verified_at' => now(),
-                ]
-            );
-            $student->assignRole('student');
-        }
-
         // Crée d'autres rôles si besoin
         $otherRoles = ['general_supervisor', 'censor', 'principal', 'guest'];
         foreach ($otherRoles as $role) {

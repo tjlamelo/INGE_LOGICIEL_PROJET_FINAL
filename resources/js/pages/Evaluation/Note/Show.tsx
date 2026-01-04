@@ -20,7 +20,10 @@ type Note = {
     type_evaluation: string | null;
     date_evaluation: string;
     appreciation: string | null;
-    eleve: { user: { name: string } } | null;
+eleve: { 
+        user: { name: string };
+        classe: { nom: string } | null; // Ajoute ceci ici
+    } | null;
     enseignement: {
         matiere: { nom: string } | null;
         classe: { nom: string } | null;
@@ -42,8 +45,11 @@ export default function NoteShow({ note }: ShowProps) {
     // Sécurisation des propriétés optionnelles
     const eleveName = note.eleve?.user?.name || "Élève inconnu";
     const matiereNom = note.enseignement?.matiere?.nom || "Matière inconnue";
-    const classeNom = note.enseignement?.classe?.nom || "Classe inconnue";
-    const enseignantName = note.enseignement?.enseignant?.user?.name || "Enseignant inconnu";
+  const classeNom = 
+    note.enseignement?.classe?.nom || 
+    note.eleve?.classe?.nom || 
+    "Classe inconnue";
+     const enseignantName = note.enseignement?.enseignant?.user?.name || "Enseignant inconnu";
     const trimestreInfo = note.trimestre ? `${note.trimestre.nom} (${note.trimestre.annee_scolaire})` : "Trimestre inconnu";
 
     return (

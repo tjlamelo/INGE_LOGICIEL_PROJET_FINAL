@@ -25,8 +25,9 @@ class Enseignant extends Model
      * Obtenir l'utilisateur associé à cet enseignant.
      * Relation One-to-One : Un enseignant est un utilisateur.
      */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+  public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
 }

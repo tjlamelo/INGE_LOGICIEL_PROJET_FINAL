@@ -10,20 +10,17 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('creneaux_horaires', function (Blueprint $table) {
-            $table->id();
-            // Heure de début et de fin du créneau
-            $table->time('heure_debut');
-            $table->time('heure_fin');
+      Schema::create('creneaux_horaires', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('classe_id')->constrained('classes')->onDelete('cascade');
+    $table->time('heure_debut');
+    $table->time('heure_fin');
+    $table->string('libelle');
+    $table->timestamps();
 
-            // Un libellé pour l'affichage (ex: "C1 8h-9h30")
-            $table->string('libelle');
+    $table->unique(['classe_id', 'heure_debut', 'heure_fin']);
+});
 
-            $table->timestamps();
-
-            // Un créneau horaire doit être unique
-            $table->unique(['heure_debut', 'heure_fin']);
-        });
     }
 
     /**

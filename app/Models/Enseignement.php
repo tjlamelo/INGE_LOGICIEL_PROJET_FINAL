@@ -17,11 +17,11 @@ class Enseignement extends Model
     ];
 
     // Relations
+public function enseignant()
+{
+    return $this->belongsTo(Enseignant::class, 'enseignant_id');
+}
 
-    public function enseignant()
-    {
-        return $this->belongsTo(User::class, 'enseignant_id');
-    }
 
     public function classe()
     {
@@ -32,4 +32,5 @@ class Enseignement extends Model
     {
         return $this->belongsTo(Matiere::class);
     }
+    
 }

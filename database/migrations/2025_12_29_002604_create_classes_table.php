@@ -12,9 +12,16 @@ return new class extends Migration {
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
-            $table->string('nom')->unique(); // ex: 3e A, Terminale C
-            $table->string('niveau'); // ex: 3e, Terminale
+            $table->string('nom')->unique();
+            $table->string('niveau');
             $table->string('filiere')->nullable();
+
+            // Ajout du professeur titulaire
+            $table->foreignId('enseignant_id')
+                ->nullable()
+                ->constrained('enseignants')
+                ->onDelete('set null');
+
             $table->timestamps();
         });
     }

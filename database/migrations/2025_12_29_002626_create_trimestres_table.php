@@ -12,10 +12,14 @@ return new class extends Migration {
     {
         Schema::create('trimestres', function (Blueprint $table) {
             $table->id();
-            $table->string('nom'); // ex: 1er Trimestre
+            $table->string('nom');
             $table->string('annee_scolaire');
+            $table->boolean('est_actif')->default(false); // <--- Trimestre en cours
+            $table->boolean('est_cloture')->default(false);
+            $table->integer('sequence_active')->default(1);
             $table->timestamps();
             $table->unique(['nom', 'annee_scolaire']);
+
         });
     }
 

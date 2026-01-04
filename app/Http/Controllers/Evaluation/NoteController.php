@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Evaluation;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enseignant;
 use Illuminate\Http\Request;
 use App\Services\Evaluation\NoteService;
 use App\Models\Note;
 use App\Models\Eleve;
 use App\Models\Enseignement;
 use App\Models\Trimestre;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class NoteController extends Controller
@@ -36,13 +38,34 @@ class NoteController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Inertia\Response
      */
+    protected function getEnseignantId(): ?int
+    {
+        $user = auth()->user();
+
+        // Si l'utilisateur n'est pas enseignant → pas de filtre
+        if (!$user || !$user->enseignant) {
+            return null;
+        }
+
+        return $user->enseignant->id;
+    }
+
     public function index(Request $request)
     {
-        $perPage = $request->get('perPage', 10);
-        $notes = $this->noteService->getPaginatedList((int) $perPage);
+        $perPage = (int) $request->get('perPage', 10);
+
+        $enseignantId = $this->getEnseignantId(); // int|null
+
+        $notes = $this->noteService->getPaginatedList(
+            $perPage,
+            $enseignantId
+        );
+        
+        $stats = $this->noteService->getStatistics($enseignantId);
 
         return Inertia::render('Evaluation/Note/Index', [
             'notes' => $notes,
+            'stats' => $stats,
         ]);
     }
 
@@ -53,33 +76,30 @@ class NoteController extends Controller
      */
     public function create()
     {
-        // Récupération des données pour les menus déroulants
-        $eleves = Eleve::with('user')
+        $enseignantId = $this->getEnseignantId();
+        $trimestreActif = Trimestre::where('est_actif', true)->firstOrFail();
+
+        $enseignements = Enseignement::where('enseignant_id', $enseignantId)
+            ->with(['classe', 'matiere'])
+            ->get();
+
+        $classeIds = $enseignements->pluck('classe_id')->unique();
+        $eleves = Eleve::whereIn('classe_id', $classeIds)
+            ->with('user')
             ->get()
-            ->sortBy(fn($eleve) => $eleve->user?->name);
-
-        $enseignements = Enseignement::with('classe', 'matiere', 'enseignant.user')
-            ->get()
-            ->map(function ($enseignement) {
-
-                $enseignantName = $enseignement->enseignant?->user?->name;
-                $enseignantName = $enseignantName ?: 'Non assigné';
-
-                return [
-                    'id' => $enseignement->id,
-                    'display_name' =>
-                        ($enseignement->matiere?->nom ?? 'Matière inconnue') . ' - ' .
-                        ($enseignement->classe?->nom ?? 'Classe inconnue') . ' (' .
-                        $enseignantName . ')',
-                ];
-            });
-
-        $trimestres = Trimestre::orderBy('annee_scolaire', 'desc')->orderBy('nom')->get();
+            ->sortBy('user.name')
+            ->values();
 
         return Inertia::render('Evaluation/Note/Create', [
             'eleves' => $eleves,
-            'enseignements' => $enseignements,
-            'trimestres' => $trimestres,
+            'enseignements' => $enseignements->map(fn($e) => [
+                'id' => $e->id,
+                'display_name' => "{$e->matiere->nom} - {$e->classe->nom}"
+            ]),
+            'trimestre_actif' => $trimestreActif,
+            'sequence_active' => $trimestreActif->sequence_active, // On envoie la séquence précise
+            // On peut restreindre les séquences selon le trimestre ici si besoin
+            'sequences_possibles' => [1, 2, 3, 4, 5, 6], 
         ]);
     }
 
@@ -91,20 +111,30 @@ class NoteController extends Controller
      */
     public function store(Request $request)
     {
+        $enseignantId = $this->getEnseignantId();
+
         $validated = $request->validate([
             'valeur' => 'required|numeric|min:0|max:20',
             'eleve_id' => 'required|exists:eleves,id',
-            'enseignement_id' => 'required|exists:enseignements,id',
+            'enseignement_id' => [
+                'required',
+                // SÉCURITÉ : Vérifie que l'enseignement appartient bien à ce prof
+                function ($attribute, $value, $fail) use ($enseignantId) {
+                    $exists = Enseignement::where('id', $value)
+                        ->where('enseignant_id', $enseignantId)
+                        ->exists();
+                    if (!$exists) $fail("Cet enseignement ne vous appartient pas.");
+                },
+            ],
             'trimestre_id' => 'required|exists:trimestres,id',
-            'type_evaluation' => 'nullable|string|max:255',
+            'sequence' => 'required|integer|between:1,6',
+            'type_evaluation' => 'required|in:Interrogation,Devoir,Examen',
             'date_evaluation' => 'required|date',
-            'appreciation' => 'nullable|string',
         ]);
 
         $this->noteService->create($validated);
 
-        return redirect()->route('notes.index')
-            ->with('success', 'Note créée avec succès.');
+        return redirect()->route('notes.index')->with('success', 'Note ajoutée.');
     }
 
     /**
@@ -130,37 +160,30 @@ class NoteController extends Controller
      */
     public function edit(Note $note)
     {
-        // Récupération des données pour les menus déroulants
-        $eleves = Eleve::with('user')
-            ->get()
-            ->sortBy(fn($eleve) => $eleve->user?->name);
+        $enseignantId = $this->getEnseignantId();
+        $trimestreActif = Trimestre::where('est_actif', true)->first();
 
-        $enseignements = Enseignement::with('classe', 'matiere', 'enseignant.user')
-            ->get()
-            ->map(function ($enseignement) {
+        // SÉCURITÉ : On ne peut éditer que si c'est notre note ET que c'est le trimestre actif
+    //  if ($note->enseignement->enseignant_id !== $enseignantId || $note->trimestre_id !== $trimestreActif?->id) {
+    //     return redirect()->route('notes.index')->with('error', 'Modification impossible.');
+    // }
 
-                $enseignantName = $enseignement->enseignant?->user?->name;
-                $enseignantName = $enseignantName ?: 'Non assigné';
+        $enseignements = Enseignement::where('enseignant_id', $enseignantId)
+            ->with(['classe', 'matiere'])
+            ->get();
 
-                return [
-                    'id' => $enseignement->id,
-                    'display_name' =>
-                        ($enseignement->matiere?->nom ?? 'Matière inconnue') . ' - ' .
-                        ($enseignement->classe?->nom ?? 'Classe inconnue') . ' (' .
-                        $enseignantName . ')',
-                ];
-            });
-
-
-        $trimestres = Trimestre::orderBy('annee_scolaire', 'desc')->orderBy('nom')->get();
-
-        $note = $this->noteService->findById($note->id);
+        $classeIds = $enseignements->pluck('classe_id')->unique();
+        $eleves = Eleve::whereIn('classe_id', $classeIds)
+            ->with('user')->get()->sortBy('user.name')->values();
 
         return Inertia::render('Evaluation/Note/Edit', [
-            'note' => $note,
+            'note' => $this->noteService->findById($note->id, $enseignantId),
             'eleves' => $eleves,
-            'enseignements' => $enseignements,
-            'trimestres' => $trimestres,
+            'enseignements' => $enseignements->map(fn($e) => [
+                'id' => $e->id,
+                'display_name' => "{$e->matiere->nom} - {$e->classe->nom}"
+            ]),
+            'trimestre_actif' => $trimestreActif,
         ]);
     }
 
@@ -173,20 +196,34 @@ class NoteController extends Controller
      */
     public function update(Request $request, Note $note)
     {
+        $enseignantId = $this->getEnseignantId();
+        $trimestreActif = Trimestre::where('est_actif', true)->first();
+
+        // SÉCURITÉ STRICTE
+        if ($note->enseignement->enseignant_id !== $enseignantId || $note->trimestre_id !== $trimestreActif?->id) {
+            abort(403, "Action interdite sur un ancien trimestre.");
+        }
+
         $validated = $request->validate([
             'valeur' => 'required|numeric|min:0|max:20',
             'eleve_id' => 'required|exists:eleves,id',
-            'enseignement_id' => 'required|exists:enseignements,id',
-            'trimestre_id' => 'required|exists:trimestres,id',
-            'type_evaluation' => 'nullable|string|max:255',
+            'enseignement_id' => [
+                'required',
+                function ($attribute, $value, $fail) use ($enseignantId) {
+                    $exists = Enseignement::where('id', $value)->where('enseignant_id', $enseignantId)->exists();
+                    if (!$exists) $fail("Cet enseignement ne vous appartient pas.");
+                },
+            ],
+            'trimestre_id' => 'required|in:' . $trimestreActif->id, // Force le trimestre actif
+            'sequence' => 'required|integer|between:1,6',
+            'type_evaluation' => 'required|in:Interrogation,Devoir,Examen',
             'date_evaluation' => 'required|date',
             'appreciation' => 'nullable|string',
         ]);
 
-        $this->noteService->update($note->id, $validated);
+        $this->noteService->update($note->id, $validated, $enseignantId);
 
-        return redirect()->route('notes.index')
-            ->with('success', 'Note mise à jour avec succès.');
+        return redirect()->route('notes.index')->with('success', 'Note mise à jour.');
     }
 
     /**
@@ -197,9 +234,14 @@ class NoteController extends Controller
      */
     public function destroy(Note $note)
     {
-        $this->noteService->delete($note->id);
+        $enseignantId = $this->getEnseignantId();
+        $trimestreActif = Trimestre::where('est_actif', true)->first();
 
-        return redirect()->route('notes.index')
-            ->with('success', 'Note supprimée avec succès.');
+        if ($note->enseignement->enseignant_id !== $enseignantId || $note->trimestre_id !== $trimestreActif?->id) {
+            abort(403, "Impossible de supprimer une note d'un trimestre passé.");
+        }
+
+        $this->noteService->delete($note->id, $enseignantId);
+        return redirect()->route('notes.index')->with('success', 'Note supprimée.');
     }
 }

@@ -13,7 +13,10 @@ return new class extends Migration {
         Schema::create('enseignants', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->constrained()->onDelete('cascade');
-            $table->string('matricule')->unique(); // Matricule interne de l'enseignant
+            $table->string('matricule')->unique(); // Format ENS-25001
+            $table->string('specialite');          // Mathématiques, Français, etc.
+            $table->string('grade');               // PLEG, PCEG, Vacataire, etc.
+ $table->string('statut')->default('Actif');
             $table->string('telephone')->nullable();
             $table->text('adresse')->nullable();
             $table->timestamps();

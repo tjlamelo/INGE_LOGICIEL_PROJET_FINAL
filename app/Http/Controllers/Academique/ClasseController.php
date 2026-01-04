@@ -29,7 +29,7 @@ class ClasseController extends Controller
     }
 
     /**
-     * Affiche la liste paginée des classes.
+     * Affiche la liste paginée des classes avec statistiques.
      *
      * @param \Illuminate\Http\Request $request
      * @return \Inertia\Response
@@ -38,9 +38,11 @@ class ClasseController extends Controller
     {
         $perPage = $request->get('perPage', 10);
         $classes = $this->classeService->getPaginatedList((int) $perPage);
+        $stats = $this->classeService->getStatistics();
 
         return Inertia::render('Academique/Classe/Index', [
             'classes' => $classes,
+            'stats' => $stats,
         ]);
     }
 
@@ -80,13 +82,13 @@ class ClasseController extends Controller
      * @param \App\Models\Classe $classe
      * @return \Inertia\Response
      */
-public function show(Classe $class)
-{
-    Log::info('Classe show:', ['classe' => $class->toArray()]);
-    return Inertia::render('Academique/Classe/Show', [
-        'classe' => $class,
-    ]);
-}
+    public function show(Classe $class)
+    {
+        Log::info('Classe show:', ['classe' => $class->toArray()]);
+        return Inertia::render('Academique/Classe/Show', [
+            'classe' => $class,
+        ]);
+    }
 
     /**
      * Affiche le formulaire d'édition d'une classe.
@@ -128,9 +130,9 @@ public function show(Classe $class)
      * @param \App\Models\Classe $classe
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Classe $classe)
+    public function destroy(Classe $class)
     {
-        $this->classeService->delete($classe->id);
+        $this->classeService->delete($class->id);
 
         return redirect()->route('classes.index')
             ->with('success', 'Classe supprimée avec succès.');

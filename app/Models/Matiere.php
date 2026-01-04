@@ -9,12 +9,13 @@ class Matiere extends Model
 {
     use HasFactory;
 
-     
+
     protected $table = 'matieres';
 
-    
+
     protected $fillable = [
         'nom',
         'code',
+        'groupe'
     ];
 }

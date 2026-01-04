@@ -14,15 +14,10 @@ class Note extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'valeur',
-        'eleve_id',
-        'enseignement_id',
-        'trimestre_id',
-        'type_evaluation',
-         'sequence', 
-        'date_evaluation',
-        'appreciation',
+   protected $fillable = [
+        'valeur', 'eleve_id', 'enseignement_id', 
+        'trimestre_id', 'sequence', 'type_evaluation', 
+        'date_evaluation', 'appreciation'
     ];
 
     /**

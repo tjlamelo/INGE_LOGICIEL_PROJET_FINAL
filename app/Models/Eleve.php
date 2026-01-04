@@ -19,6 +19,7 @@ class Eleve extends Model
         'contact_tuteur',
         'classe_id',
     ];
+    
 
     protected $casts = [
         'date_naissance' => 'date',

@@ -46,7 +46,16 @@ export default function EnseignementEdit({ enseignement, enseignants, classes, m
                                 <Label htmlFor="enseignant_id">Enseignant</Label>
                                 <select id="enseignant_id" value={data.enseignant_id} onChange={(e) => setData('enseignant_id', e.target.value)} className="w-full p-2 border rounded-md bg-white">
                                     <option value="">Sélectionner un enseignant</option>
-                                    {enseignants.map(ens => <option key={ens.id} value={ens.id}>{ens.user.name}</option>)}
+ 
+{(enseignants || []).map((enseignant) => (
+    <option key={enseignant.id} value={enseignant.id}>
+        {enseignant.user?.name || "Sans nom"}
+    </option>
+))}
+                               
+                               
+                               
+                               
                                 </select>
                                 {errors.enseignant_id && <p className="text-red-500 text-sm mt-1">{errors.enseignant_id}</p>}
                             </div>
