@@ -25,6 +25,8 @@ import {index as enseignantIndex } from '@/routes/enseignants';
 import {index as trimestreIndex}   from '@/routes/trimestres';
 import {index as enseignementIndex}   from '@/routes/enseignements';
 import {index as noteIndex}   from '@/routes/notes';
+import { index as salleIndex } from '@/routes/salles';
+
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -82,6 +84,11 @@ const mainNavItems: NavItem[] = [
         title: 'Note',
         href: noteIndex(),
         icon: LayoutGrid,
+    },
+    {
+    title: 'Salle',
+    href: salleIndex(),
+    icon: LayoutGrid,
     },
 ];
 

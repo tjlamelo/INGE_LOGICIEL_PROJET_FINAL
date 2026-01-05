@@ -1,0 +1,94 @@
+/* =======================
+   CLASSES - STYLE MODERNE
+   ======================= */
+
+.classes-container {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.classes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.classes-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.btn-add {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* TABLE */
+.classes-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.classes-table thead {
+    background: #f9fafb;
+}
+
+.classes-table th {
+    text-align: left;
+    padding: 14px;
+    font-size: 13px;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.classes-table td {
+    padding: 14px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 14px;
+    color: #374151;
+}
+
+.classes-table tr:hover {
+    background: #f3f4f6;
+}
+
+/* ACTIONS */
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-view {
+    background: #10b981;
+    color: white;
+}
+
+.btn-edit {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}

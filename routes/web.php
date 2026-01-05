@@ -1,6 +1,7 @@
 <?php
-
+use App\Http\Controllers\Academique\CreneauHoraireController;
 use App\Http\Controllers\Academique\ClasseController;
+use App\Http\Controllers\Academique\SalleController;
 use App\Http\Controllers\Academique\EnseignementController;
 use App\Http\Controllers\Academique\MatiereController;
 use App\Http\Controllers\Academique\TrimestreController;
@@ -46,6 +47,8 @@ Route::put('/admin/users/{user}/role', [AdminPermissionController::class, 'updat
 Route::middleware(['auth'])->group(function () {
     Route::resource('matieres', MatiereController::class);
     Route::resource('classes', ClasseController::class);
+    Route::resource('salles', SalleController::class);
+    Route::resource('creneaux_horaires', CreneauHoraireController::class);
     Route::resource('eleves', EleveController::class)->parameters([
         'eleves' => 'eleve', // ici on s'assure que le paramètre s'appelle 'eleve'
     ]);

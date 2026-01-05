@@ -27,10 +27,10 @@ export default function AdminDashboard({ users }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-               <Head title="Dashboard" />
-           
+            <Head title="Dashboard" />
+
             <div className="p-6">
-                {/* <TableUser users={users} roles={[]} /> */}
+                <TableUser users={users} roles={[]} />
             </div>
         </AppLayout>
     );
