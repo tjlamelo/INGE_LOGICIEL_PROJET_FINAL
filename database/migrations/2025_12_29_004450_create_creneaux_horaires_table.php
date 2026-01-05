@@ -10,9 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-      Schema::create('creneaux_horaires', function (Blueprint $table) {
+ Schema::create('creneaux_horaires', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('classe_id')->constrained('classes')->onDelete('cascade');
+    $table->foreignId('classe_id')
+          ->constrained('classes')
+          ->cascadeOnDelete();
     $table->time('heure_debut');
     $table->time('heure_fin');
     $table->string('libelle');
@@ -20,6 +22,7 @@ return new class extends Migration {
 
     $table->unique(['classe_id', 'heure_debut', 'heure_fin']);
 });
+
 
     }
 
