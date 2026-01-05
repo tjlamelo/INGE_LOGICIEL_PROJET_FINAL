@@ -120,6 +120,18 @@ const mainNavItems: NavItem[] = [
         icon: FileBarChart,      
         roles: ['admin', 'teacher'],
     },
+    {
+        title: 'Notifications',
+        href:  '/notifications',
+        icon: FileBarChart,      
+        roles: ['admin', 'teacher'],
+    },
+    {
+        title: 'Certificats',
+        href:  '/certificats',
+        icon: FileBarChart,      
+        roles: ['admin', 'teacher'],
+    },
 ];
 
 const footerNavItems: NavItem[] = [
